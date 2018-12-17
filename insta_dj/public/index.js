@@ -19,6 +19,45 @@ var ID = function () {
     return Math.random().toString(36).substr(2, 6);
 };
 
+var guest = false;
+
+var guest_data_id;
+var guest_host;
+var guest_queue;
+
+function enterRoom() {
+    guest = true;
+
+    var code = document.getElementById('room_code').value;
+    console.log("clicked enter room with code: " + code);
+
+    // Query Firestore to cross-check entered code
+    db.collection("rooms").get().then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {
+            // doc.data() is never undefined for query doc snapshots
+            console.log(doc.id, " => ", doc.data());
+
+            let data = doc.data();
+            console.log(data.id);
+
+            if (code == data.id) {
+                alert("Found a room!");
+
+                guest_data_id = data.id;
+                guest_host = data.host;
+                guest_queue = data.queue;
+
+                document.getElementById('host_name').innerHTML = "Host: " + guest_host;
+                $('#login').hide();
+                $('#guest').show();
+            }
+        });
+    })
+    .catch(function(error) {
+        console.log("Error getting documents: ", error);
+    });
+}
+
 
 (function() {
     /**
@@ -62,6 +101,8 @@ var ID = function () {
 
     var firebaseDocumentReference;
 
+    var host_name;
+
     if (error) {
         alert('There was an error during the authentication: ' + error);
     } else {
@@ -81,12 +122,19 @@ var ID = function () {
                     userProfilePlaceholder.innerHTML = userProfileTemplate(response);
 
                     $('#login').hide();
+                    $('#guest').hide();
                     $('#loggedin').show();
+
+                    guest = false;
+
+                    console.log("logged in as: " + response.display_name);
+                    host_name = response.display_name;
 
                     document.location.hash = "";
 
                     db.collection("rooms").add({
                         id: room_id,
+                        host: host_name,
                         queue: queue
                     })
                     .then(function(docRef) {
@@ -102,23 +150,8 @@ var ID = function () {
             // render initial screen
             $('#login').show();
             $('#loggedin').hide();
+            $('#guest').hide();
         }
-
-        document.getElementById('obtain-new-token').addEventListener('click', function() {
-            console.log("inside obtain-new-token");
-            $.ajax({
-                url: '/refresh_token',
-                data: {
-                    'refresh_token': refresh_token
-                }
-            }).done(function(data) {
-                access_token = data.access_token;
-                oauthPlaceholder.innerHTML = oauthTemplate({
-                    access_token: access_token,
-                    refresh_token: refresh_token
-                });
-            });
-        }, false);
 
         function triggerNextTrack() {
             console.log("current_track_count: " + currentTrackCount);
