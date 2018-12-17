@@ -1,60 +1,3 @@
-// var resultsList = document.getElementById("resultsList");
-
-// // Handle new search form submit
-// document.getElementById("searchBox").addEventListener("submit", function(event) {
-//  console.log("inside 1");
-//  console.log("searched for: " + newSearch.value);
-//  event.preventDefault();
-//  var accessToken = "BQDGfjIpj_J5MQE72g_8zkDtsWucnLrMBWSdkXnzXLeBBmb28nHcHupDIqKZH7i-ofwi4UhjFoH8RzN7uMXQt8iqqorquV6jTVAgFOl3DC2pz1R-7RBTLu3ONjBkoyoRrkwuUbWc0F9d3grO3fpZOBWvlM4JDC91bWqrTmrI";
-    
-//  // Empty list of results before populating with new results
-//  document.getElementById('resultsList').innerHTML = '';
-
-//  $.ajax({
-//      url: 'https://api.spotify.com/v1/search?q=' + newSearch.value + '&type=track%2Cartist&market=US&limit=10',
-//      type: 'GET',
-//      headers: {
-//          'Authorization' : 'Bearer ' + accessToken
-//      },
-//      success: function(data) {
-//          console.log("call successful");
-
-//          // Parse response for artists
-//          console.log("_______________________");
-//          console.log("Here are the artists:");
-//          for (var i = 0; i < data.artists.items.length; i++) {
-//              var item = data.artists.items[i];
-//              console.log(item.name);
-
-//              // Populate list of results
-//              var entry = document.createElement("li");
-//              entry.appendChild(document.createTextNode("Artist: " + item.name));
-//              resultsList.appendChild(entry);
-//          }
-
-//          // Parse response for tracks
-//          console.log("_______________________");
-//          console.log("Here are the tracks:");
-//          for (var i = 0; i < data.tracks.items.length; i++) {
-//              var item = data.tracks.items[i];
-//              console.log(item.name);
-
-//              // Populate list of results
-//              var entry = document.createElement("li");
-//              entry.appendChild(document.createTextNode("Track: " + item.name));
-//              resultsList.appendChild(entry);
-//          }
-            
-//      },
-//      error: function(data) {
-//          console.log("some error");
-//      }
-//  });
-// });
-
-
-
-
 var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
 var cors = require('cors');
@@ -94,7 +37,7 @@ app.get('/login', function(req, res) {
   res.cookie(stateKey, state);
 
   // your application requests authorization
-  var scope = 'user-read-private user-read-email';
+  var scope = 'user-read-private user-read-email streaming user-modify-playback-state';
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
@@ -193,5 +136,3 @@ app.get('/refresh_token', function(req, res) {
 
 console.log('Listening on 8888');
 app.listen(8888);
-
-
