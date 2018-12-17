@@ -34,6 +34,13 @@
 
     var our_device_id;
 
+    var current_track_progress = 0;
+
+    var queue = [];
+    var currentTrackCount = 0;
+
+    var allowNewTrigger = true;
+
     if (error) {
         alert('There was an error during the authentication: ' + error);
     } else {
@@ -79,7 +86,15 @@
             });
         }, false);
 
-        // Play a specified track on the Web Playback SDK's device ID
+        function triggerNextTrack() {
+            console.log("current_track_count: " + currentTrackCount);
+            console.log("triggering next track with id: " + queue[currentTrackCount]);
+            console.log(queue);
+            allowNewTrigger = true;
+            play(our_device_id, queue[currentTrackCount]);
+        }
+
+        // Play a specified track on the device id
         function play(device_id, track_id) {
             console.log("we are in play");
             const token = access_token;
@@ -89,10 +104,54 @@
                 data: '{"uris": ["spotify:track:' + track_id + '"]}',
                 beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + token );},
                 success: function(data) {
-                    console.log(data)
+                    console.log(data);
                 }
             });
+
+            setInterval(function(){
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/me/player/currently-playing',
+                    type: 'GET',
+                    headers: {
+                        'Authorization' : 'Bearer ' + access_token
+                    },
+                    success: function(data) {
+                        console.log("call to currently playing successful");
+                        let progress_ms = data.progress_ms;
+                        current_track_progress = progress_ms;
+                        console.log("progress_ms: " + progress_ms);
+
+                        if (progress_ms == 0 && allowNewTrigger) {
+                            currentTrackCount += 1;
+                            triggerNextTrack();
+                            allowNewTrigger = false;
+                        }
+                    },
+                    error: function(data) {
+                        console.log("some error");
+                    }
+                });
+            }, 3000);
+
+            // // Get duration of a track
+            // $.ajax({
+            //     url: 'https://api.spotify.com/v1/audio-features/' + track_id,
+            //     type: 'GET',
+            //     headers: {
+            //         'Authorization' : 'Bearer ' + access_token
+            //     },
+            //     success: function(data) {
+            //         console.log("call to audio features successful");
+            //         let duration = data.duration_ms;
+            //         console.log("duration: " + duration);
+            //     },
+            //     error: function(data) {
+            //         console.log("some error");
+            //     }
+            // });
         }
+
+
 
         window.onSpotifyWebPlaybackSDKReady = () => {
             const token = access_token;
@@ -180,8 +239,16 @@
 
                         // Add onclick listener to play selected track
                         entry.onclick = function() {
-                            alert("About to play: " + item.name);
-                            play(our_device_id, item.id);
+                            alert("Adding to queue: " + item.name);
+                            // play(our_device_id, item.id);
+                            queue.push(item.id);
+
+                            console.log("current_track_progress: " + current_track_progress + " queue.length = " + queue.length);
+                            if (current_track_progress == 0) {
+                                // currentTrackCount += 1;
+                                triggerNextTrack();
+                            }
+
                         };
 
                         resultsList.appendChild(entry);
