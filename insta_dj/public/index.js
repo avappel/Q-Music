@@ -298,6 +298,45 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                 triggerNextTrack();
             }
 
+            if (guest && guest_queue[currentTrackCount + 1]) {
+                document.getElementById('next_up').innerHTML = "Next Up: " + guest_queue[currentTrackCount + 1]; // + ", by " + data.item.album.artists[0].name;
+
+
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/tracks/' + guest_queue[currentTrackCount + 1],
+                    type: 'GET',
+                    headers: {
+                        'Authorization' : 'Bearer ' + access_token
+                    },
+                    success: function(data) {
+                        document.getElementById('next_up').innerHTML = "Next Up: " + data.name + ", by " + data.album.artists[0].name;
+                    },
+                    error: function(data) {
+                        console.log("some error");
+                    }
+                });
+
+            }
+            else if (!guest && queue[currentTrackCount + 1]) {
+                document.getElementById('next_up').innerHTML = "Next Up: " + queue[currentTrackCount + 1]; // + ", by " + data.item.album.artists[0].name;
+
+
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/tracks/' + queue[currentTrackCount + 1],
+                    type: 'GET',
+                    headers: {
+                        'Authorization' : 'Bearer ' + access_token
+                    },
+                    success: function(data) {
+                        document.getElementById('next_up').innerHTML = "Next Up: " + data.name + ", by " + data.album.artists[0].name;
+                    },
+                    error: function(data) {
+                        console.log("some error");
+                    }
+                });
+            }
+
+
         }, 3000);
 
 
