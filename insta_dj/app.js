@@ -1,3 +1,8 @@
+// Alex Appel, Yash Thacker
+// Final Project CSE 204
+// 12/17/18
+// Code used from Spotify Web and Player API Quick Start Guides
+
 var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
 var cors = require('cors');
@@ -5,8 +10,8 @@ var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
 var client_id = '5242bc5b2e3f4cacaee83c8aaa75020d'; // Your client id
-var client_secret = 'cec8710517cf44dbb6e69940d22b36c1'; // Your secret
-var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
+var client_secret = 'cec8710517cf44dbb6e69940d22b36c1'; // Your secret, DELETE BEFORE POSTING PUBLICLY
+var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri, CHANGE EVENTUALLY
 
 /**
  * Generates a random string containing numbers and letters

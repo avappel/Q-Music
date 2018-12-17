@@ -1,0 +1,16 @@
+/*
+    Alex Appel, Yash Thacker
+    Final Project CSE 204
+    12/17/18
+    Some basic code used from Spotify Web and Player Api Quick Start Guides
+ */
+
+#login, #loggedin {
+    display: none;
+}
+.text-overflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 500px;
+}
