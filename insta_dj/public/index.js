@@ -3,10 +3,7 @@
 // 12/17/18
 // Some basic code used from Spotify Web and Player API Quick Start Guides
 
-/**
-* Obtains parameters from the hash of the URL
-* @return Object
-*/
+
 function getHashParams() {
     var hashParams = {};
     var e, r = /([^&;=]+)=?([^&;]*)/g,
@@ -73,6 +70,8 @@ var guestFirebaseDocumentReference;
 
 var host_name;
 
+var current_track_name;
+
 document.getElementById("join_existing").addEventListener("submit", function(event) {
     event.preventDefault();
 
@@ -103,6 +102,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                 access_token = guest_access_token;
 
                 document.getElementById('host_name').innerHTML = "Host: " + guest_host;
+                document.getElementById('room_id').innerHTML = "Room Id: " + guest_data_id;
                 $('#login').hide();
                 $('#guest').show();
             }
@@ -143,6 +143,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
                     console.log("logged in as: " + response.display_name);
                     host_name = response.display_name;
+                    document.getElementById('room_id').innerHTML = "Room Id: " + room_id;
 
                     document.location.hash = "";
 
@@ -202,6 +203,8 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                         let progress_ms = data.progress_ms;
                         current_track_progress = progress_ms;
                         console.log("progress_ms: " + progress_ms);
+
+                        document.getElementById('currently_playing').innerHTML = "Currently Playing: " + data.item.name + ", by " + data.item.album.artists[0].name;
 
                         if (progress_ms == 0 && allowNewTrigger) {
                             currentTrackCount += 1;
