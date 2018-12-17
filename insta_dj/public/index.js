@@ -3,6 +3,23 @@
 // 12/17/18
 // Some basic code used from Spotify Web and Player API Quick Start Guides
 
+// Initialize Cloud Firestore through Firebase
+var db = firebase.firestore();
+
+// Disable deprecated features
+db.settings({
+  timestampsInSnapshots: true
+});
+
+
+var ID = function () {
+    // Math.random should be unique because of its seeding algorithm.
+    // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+    // after the decimal.
+    return Math.random().toString(36).substr(2, 6);
+};
+
+
 (function() {
     /**
     * Obtains parameters from the hash of the URL
@@ -41,6 +58,10 @@
 
     var allowNewTrigger = true;
 
+    let room_id = ID();
+
+    var firebaseDocumentReference;
+
     if (error) {
         alert('There was an error during the authentication: ' + error);
     } else {
@@ -61,7 +82,20 @@
 
                     $('#login').hide();
                     $('#loggedin').show();
+
                     document.location.hash = "";
+
+                    db.collection("rooms").add({
+                        id: room_id,
+                        queue: queue
+                    })
+                    .then(function(docRef) {
+                        console.log("Document written with ID: ", docRef.id);
+                        firebaseDocumentReference = docRef.id;
+                    })
+                    .catch(function(error) {
+                        console.error("Error adding document: ", error);
+                    });
                 }
             });
         } else {
@@ -175,8 +209,6 @@
                 console.log('Ready with Device ID', device_id);
 
                 our_device_id = device_id;
-
-                play(device_id);
             });
 
             // Not Ready
@@ -248,6 +280,21 @@
                                 // currentTrackCount += 1;
                                 triggerNextTrack();
                             }
+
+                            // Update Firestore
+                            var roomRef = db.collection("rooms").doc(firebaseDocumentReference);
+
+                            // Set the queue in Firestore to our queue
+                            return roomRef.update({
+                                queue: queue
+                            })
+                            .then(function() {
+                                console.log("Document successfully updated!");
+                            })
+                            .catch(function(error) {
+                                // The document probably doesn't exist.
+                                console.error("Error updating document: ", error);
+                            });
 
                         };
 
