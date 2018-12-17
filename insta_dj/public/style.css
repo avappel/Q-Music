@@ -4,6 +4,40 @@
     12/17/18
     Some basic code used from Spotify Web and Player Api Quick Start Guides
  */
+ body{
+   background-image: url(background.jpg);
+   background-repeat: no-repeat;
+   background-size: cover;
+ }
+#login{
+  border-color: white;
+  border-width: thick;
+  border-style: solid;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  margin-top: 15%;
+  width: 30%;
+  border-radius: 30px;
+  background-color: rgba(255, 255, 255, 0.65);
+}
+#room_code{
+  padding: 10px 20px;
+  border: 2px solid white;
+  border-radius: 15px;
+  color: white;
+  font-family: sans-serif;
+  font-size: 20px;
+  text-align: center;
+  background: -webkit-linear-gradient(-100deg, rgba(145,153,242,0.7) 0, rgba(186,11,162,0.7) 100%);
+}
+.btn{
+  width: 50%;
+  padding: 10px;
+}
+::-webkit-input-placeholder{
+  color: white;
+}
 
 #login, #loggedin {
     display: none;
