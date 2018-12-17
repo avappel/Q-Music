@@ -35,8 +35,13 @@
             <a href="/login" class="btn btn-primary">Log in with Spotify</a>
 
             <h2>Enter an Existing Room Code</h2>
-            <input id="room_code" type="text" name="room_code" placeholder="Code here">
-            <button type="button" name="submit" onclick="enterRoom()">Enter</button>
+            <!-- <input id="room_code" type="text" name="room_code" placeholder="Code here">
+            <button type="button" name="submit" onclick="enterRoom()">Enter</button> -->
+
+            <form id="join_existing">
+                <input id="room_code" type="text" name="code" placeholder="123456">
+                <button>Join</button>
+            </form>
         </div>
         <div id="loggedin">
             <div id="user-profile">
@@ -63,12 +68,12 @@
             </div>
             <div id="search">
                 <h3>Add a song to queue</h3>
-                <form id="searchBox">
-                    <input id="newSearch" type="text" name="search" placeholder="Song">
+                <form id="searchBox2">
+                    <input id="newSearch2" type="text" name="search" placeholder="Song">
                     <button>Search</button>
                 </form>
                 <div>
-                    <ul id="resultsList">
+                    <ul id="resultsList2">
                     </ul>
                 </div>
             </div>

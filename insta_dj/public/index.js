@@ -3,6 +3,35 @@
 // 12/17/18
 // Some basic code used from Spotify Web and Player API Quick Start Guides
 
+/**
+* Obtains parameters from the hash of the URL
+* @return Object
+*/
+function getHashParams() {
+    var hashParams = {};
+    var e, r = /([^&;=]+)=?([^&;]*)/g,
+    q = window.location.hash.substring(1);
+    while ( e = r.exec(q)) {
+        hashParams[e[1]] = decodeURIComponent(e[2]);
+    }
+    return hashParams;
+}
+
+var userProfileSource = document.getElementById('user-profile-template').innerHTML,
+userProfileTemplate = Handlebars.compile(userProfileSource),
+userProfilePlaceholder = document.getElementById('user-profile');
+
+var oauthSource = document.getElementById('oauth-template').innerHTML,
+oauthTemplate = Handlebars.compile(oauthSource),
+oauthPlaceholder = document.getElementById('oauth');
+
+var params = getHashParams();
+
+var access_token = params.access_token,
+refresh_token = params.refresh_token,
+error = params.error;
+
+
 // Initialize Cloud Firestore through Firebase
 var db = firebase.firestore();
 
@@ -24,8 +53,29 @@ var guest = false;
 var guest_data_id;
 var guest_host;
 var guest_queue;
+var guest_access_token;
+var guest_device_id;
 
-function enterRoom() {
+var our_device_id;
+
+var current_track_progress = 0;
+
+var queue = [];
+var currentTrackCount = 0;
+
+var allowNewTrigger = true;
+
+let room_id = ID();
+
+var firebaseDocumentReference;
+
+var guestFirebaseDocumentReference;
+
+var host_name;
+
+document.getElementById("join_existing").addEventListener("submit", function(event) {
+    event.preventDefault();
+
     guest = true;
 
     var code = document.getElementById('room_code').value;
@@ -46,6 +96,11 @@ function enterRoom() {
                 guest_data_id = data.id;
                 guest_host = data.host;
                 guest_queue = data.queue;
+                guest_access_token = data.token;
+                guest_device_id = data.device_id;
+                guestFirebaseDocumentReference = doc.id;
+
+                access_token = guest_access_token;
 
                 document.getElementById('host_name').innerHTML = "Host: " + guest_host;
                 $('#login').hide();
@@ -56,52 +111,11 @@ function enterRoom() {
     .catch(function(error) {
         console.log("Error getting documents: ", error);
     });
-}
+});
+
 
 
 (function() {
-    /**
-    * Obtains parameters from the hash of the URL
-    * @return Object
-    */
-    function getHashParams() {
-        var hashParams = {};
-        var e, r = /([^&;=]+)=?([^&;]*)/g,
-        q = window.location.hash.substring(1);
-        while ( e = r.exec(q)) {
-            hashParams[e[1]] = decodeURIComponent(e[2]);
-        }
-        return hashParams;
-    }
-
-    var userProfileSource = document.getElementById('user-profile-template').innerHTML,
-    userProfileTemplate = Handlebars.compile(userProfileSource),
-    userProfilePlaceholder = document.getElementById('user-profile');
-
-    var oauthSource = document.getElementById('oauth-template').innerHTML,
-    oauthTemplate = Handlebars.compile(oauthSource),
-    oauthPlaceholder = document.getElementById('oauth');
-
-    var params = getHashParams();
-
-    var access_token = params.access_token,
-    refresh_token = params.refresh_token,
-    error = params.error;
-
-    var our_device_id;
-
-    var current_track_progress = 0;
-
-    var queue = [];
-    var currentTrackCount = 0;
-
-    var allowNewTrigger = true;
-
-    let room_id = ID();
-
-    var firebaseDocumentReference;
-
-    var host_name;
 
     if (error) {
         alert('There was an error during the authentication: ' + error);
@@ -135,7 +149,8 @@ function enterRoom() {
                     db.collection("rooms").add({
                         id: room_id,
                         host: host_name,
-                        queue: queue
+                        queue: queue,
+                        token: access_token
                     })
                     .then(function(docRef) {
                         console.log("Document written with ID: ", docRef.id);
@@ -198,24 +213,8 @@ function enterRoom() {
                         console.log("some error");
                     }
                 });
-            }, 3000);
 
-            // // Get duration of a track
-            // $.ajax({
-            //     url: 'https://api.spotify.com/v1/audio-features/' + track_id,
-            //     type: 'GET',
-            //     headers: {
-            //         'Authorization' : 'Bearer ' + access_token
-            //     },
-            //     success: function(data) {
-            //         console.log("call to audio features successful");
-            //         let duration = data.duration_ms;
-            //         console.log("duration: " + duration);
-            //     },
-            //     error: function(data) {
-            //         console.log("some error");
-            //     }
-            // });
+            }, 3000);
         }
 
 
@@ -268,19 +267,52 @@ function enterRoom() {
         };
 
 
+        setInterval(function(){
+            // Query Firestore to cross-check entered code
+            db.collection("rooms").get().then(function(querySnapshot) {
+                querySnapshot.forEach(function(doc) {
+
+                    let data = doc.data();
+
+                    if (firebaseDocumentReference == doc.id) {
+                        console.log("Updating local queue for host");
+                        queue = data.queue;
+                        console.log(queue);
+                    }
+                    else if (guestFirebaseDocumentReference == doc.id) {
+                        console.log("Updating local queue for guest");
+                        guest_queue = data.queue;
+                        console.log(guest_queue);
+                    }
+                });
+            })
+            .catch(function(error) {
+                console.log("Error getting documents: ", error);
+            });
+
+            if (!guest && current_track_progress == 0) {
+                console.log("host");
+                triggerNextTrack();
+            }
+
+        }, 3000);
+
+
         var resultsList = document.getElementById("resultsList");
 
         // Handle new search form submit
         document.getElementById("searchBox").addEventListener("submit", function(event) {
+            alert("searched host!");
             console.log("inside 1");
-            console.log("searched for: " + newSearch.value);
+            console.log("searched for: " + document.getElementById('newSearch').value);
+            var search = document.getElementById('newSearch').value;
             event.preventDefault();
 
             // Empty list of results before populating with new results
             document.getElementById('resultsList').innerHTML = '';
 
             $.ajax({
-                url: 'https://api.spotify.com/v1/search?q=' + newSearch.value + '&type=track&market=US&limit=10',
+                url: 'https://api.spotify.com/v1/search?q=' + search + '&type=track&market=US&limit=10',
                 type: 'GET',
                 headers: {
                     'Authorization' : 'Bearer ' + access_token
@@ -319,7 +351,8 @@ function enterRoom() {
 
                             // Set the queue in Firestore to our queue
                             return roomRef.update({
-                                queue: queue
+                                queue: queue,
+                                device_id: our_device_id
                             })
                             .then(function() {
                                 console.log("Document successfully updated!");
@@ -332,6 +365,76 @@ function enterRoom() {
                         };
 
                         resultsList.appendChild(entry);
+                    }
+
+                },
+                error: function(data) {
+                    console.log("some error");
+                }
+            });
+        });
+
+        var resultsList2 = document.getElementById("resultsList2");
+
+
+        // Handle new search form submit
+        document.getElementById("searchBox2").addEventListener("submit", function(event) {
+            alert("searched guest!");
+            console.log("inside 1");
+            console.log("searched for: " + document.getElementById('newSearch2').value);
+            var search = document.getElementById('newSearch2').value;
+            event.preventDefault();
+
+            // Empty list of results before populating with new results
+            document.getElementById('resultsList2').innerHTML = '';
+
+            $.ajax({
+                url: 'https://api.spotify.com/v1/search?q=' + search + '&type=track&market=US&limit=10',
+                type: 'GET',
+                headers: {
+                    'Authorization' : 'Bearer ' + access_token
+                },
+                success: function(data) {
+                    console.log("call successful GUEST");
+                    console.log("token: " + access_token);
+
+                    // Parse response for tracks
+                    console.log("_______________________");
+                    console.log("Here are the tracks:");
+                    for (var i = 0; i < data.tracks.items.length; i++) {
+                        let item = data.tracks.items[i];
+                        console.log(item.name);
+
+                        // Populate list of results
+                        let entry = document.createElement("li");
+                        entry.appendChild(document.createTextNode("Track: " + item.name));
+
+                        console.log("id: " + item.id);
+
+                        // Add onclick listener to play selected track
+                        entry.onclick = function() {
+                            alert("Adding to queue: " + item.name);
+                            // play(our_device_id, item.id);
+                            guest_queue.push(item.id);
+
+                            // Update Firestore
+                            var roomRef = db.collection("rooms").doc(guestFirebaseDocumentReference);
+
+                            // Set the queue in Firestore to our queue
+                            return roomRef.update({
+                                queue: guest_queue
+                            })
+                            .then(function() {
+                                console.log("Document successfully updated!");
+                            })
+                            .catch(function(error) {
+                                // The document probably doesn't exist.
+                                console.error("Error updating document: ", error);
+                            });
+
+                        };
+
+                        resultsList2.appendChild(entry);
                     }
 
                 },
