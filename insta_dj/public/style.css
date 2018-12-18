@@ -113,6 +113,13 @@ ul li::before {
   -webkit-transition: font-size .3s;
   border-radius: 15px;
 }
+#resultsList li:active{
+  -moz-transition: all .2s ease-in;
+  -o-transition: all .2s ease-in;
+  -webkit-transition: all .2s ease-in;
+  transition: all .2s ease-in;
+  background: green;
+}
 #newSearch{
   height: 40px;
   text-align: center;
