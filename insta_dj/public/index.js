@@ -181,31 +181,31 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                 }
             });
 
-            setInterval(function(){
-                $.ajax({
-                    url: 'https://api.spotify.com/v1/me/player/currently-playing',
-                    type: 'GET',
-                    headers: {
-                        'Authorization' : 'Bearer ' + access_token
-                    },
-                    success: function(data) {
-                        let progress_ms = data.progress_ms;
-                        current_track_progress = progress_ms;
-
-                        document.getElementById('currently_playing').innerHTML = "Currently Playing: " + data.item.name + ", by " + data.item.album.artists[0].name;
-
-                        if (progress_ms == 0 && allowNewTrigger) {
-                            currentTrackCount += 1;
-                            triggerNextTrack();
-                            allowNewTrigger = false;
-                        }
-                    },
-                    error: function(data) {
-                        console.log("Some error");
-                    }
-                });
-
-            }, 3000);
+            // setInterval(function(){
+            //     $.ajax({
+            //         url: 'https://api.spotify.com/v1/me/player/currently-playing',
+            //         type: 'GET',
+            //         headers: {
+            //             'Authorization' : 'Bearer ' + access_token
+            //         },
+            //         success: function(data) {
+            //             let progress_ms = data.progress_ms;
+            //             current_track_progress = progress_ms;
+            //
+            //             document.getElementById('currently_playing').innerHTML = "Currently Playing: " + data.item.name + ", by " + data.item.album.artists[0].name;
+            //
+            //             if (progress_ms == 0 && allowNewTrigger) {
+            //                 currentTrackCount += 1;
+            //                 triggerNextTrack();
+            //                 allowNewTrigger = false;
+            //             }
+            //         },
+            //         error: function(data) {
+            //             console.log("Some error");
+            //         }
+            //     });
+            //
+            // }, 3000);
         }
 
 
@@ -316,6 +316,31 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                     }
                 });
             }
+
+
+            $.ajax({
+                url: 'https://api.spotify.com/v1/me/player/currently-playing',
+                type: 'GET',
+                headers: {
+                    'Authorization' : 'Bearer ' + access_token
+                },
+                success: function(data) {
+                    let progress_ms = data.progress_ms;
+                    current_track_progress = progress_ms;
+
+                    document.getElementById('currently_playing').innerHTML = "Currently Playing: " + data.item.name + ", by " + data.item.album.artists[0].name;
+
+                    if (progress_ms == 0 && allowNewTrigger) {
+                        currentTrackCount += 1;
+                        triggerNextTrack();
+                        allowNewTrigger = false;
+                    }
+                },
+                error: function(data) {
+                    console.log("Some error");
+                }
+            });
+
 
 
         }, 3000);
