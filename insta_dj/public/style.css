@@ -172,19 +172,24 @@ ul li::before {
   border-radius: 15px;
 }
 
-@media (max-width:1350) {
-  #login{
-    width: 100%;
-  }
-  #loginedin{
-    width: 100%;
-  }
+#login {
+    width: 60%;
 }
-@media (max-width:500px) {
-  #login{
-    width: 100%;
-  }
-  #loginedin{
-    width: 100%;
-  }
+#loggedin {
+    width: 60%;
+}
+#guest {
+    width: 60%;
+}
+
+@media (max-width: 600px) {
+    #login {
+        width: 100%;
+    }
+    #loggedin {
+        width: 100%;
+    }
+    #guest {
+        width: 100%;
+    }
 }
