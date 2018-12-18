@@ -114,8 +114,12 @@ ul li::before {
   border-radius: 15px;
 }
 #resultsList li:active{
-  transition: background-color .1s linear;
-  background: green;
+  -webkit-animation-delay:1s;
+  -moz-transition: all .2s ease-in;
+  -o-transition: all .2s ease-in;
+  -webkit-transition: all .2s ease-in;
+  transition: background-color .05s ease-in;
+  background: rgb(153, 255, 102,0.6);
 }
 #newSearch{
   height: 40px;
