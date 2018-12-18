@@ -1,7 +1,7 @@
 // Alex Appel, Yash Thacker
 // Final Project CSE 204
 // 12/17/18
-// Some basic code used from Spotify Web and Player API Quick Start Guides
+// Some starter code used from Spotify Web and Player API Quick Start Guides
 
 
 function getHashParams() {
@@ -90,8 +90,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
             console.log(data.id);
 
             if (code == data.id) {
-                alert("Found a room!");
-
                 guest_data_id = data.id;
                 guest_host = data.host;
                 guest_queue = data.queue;
@@ -318,8 +316,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
             }
             else if (!guest && queue[currentTrackCount + 1]) {
-                document.getElementById('next_up').innerHTML = "Next Up: " + queue[currentTrackCount + 1]; // + ", by " + data.item.album.artists[0].name;
-
 
                 $.ajax({
                     url: 'https://api.spotify.com/v1/tracks/' + queue[currentTrackCount + 1],
@@ -344,7 +340,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
         // Handle new search form submit
         document.getElementById("searchBox").addEventListener("submit", function(event) {
-            alert("searched host!");
             console.log("inside 1");
             console.log("searched for: " + document.getElementById('newSearch').value);
             var search = document.getElementById('newSearch').value;
@@ -376,10 +371,8 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
                         console.log("id: " + item.id);
 
-                        // Add onclick listener to play selected track
+                        // Add onclick listener to add selected track to queue
                         entry.onclick = function() {
-                            alert("Adding to queue: " + item.name);
-                            // play(our_device_id, item.id);
                             queue.push(item.id);
 
                             console.log("current_track_progress: " + current_track_progress + " queue.length = " + queue.length);
@@ -421,7 +414,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
         // Handle new search form submit
         document.getElementById("searchBox2").addEventListener("submit", function(event) {
-            alert("searched guest!");
             console.log("inside 1");
             console.log("searched for: " + document.getElementById('newSearch2').value);
             var search = document.getElementById('newSearch2').value;
@@ -453,10 +445,8 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
                         console.log("id: " + item.id);
 
-                        // Add onclick listener to play selected track
+                        // Add onclick listener to add selected track to queue
                         entry.onclick = function() {
-                            alert("Adding to queue: " + item.name);
-                            // play(our_device_id, item.id);
                             guest_queue.push(item.id);
 
                             // Update Firestore
