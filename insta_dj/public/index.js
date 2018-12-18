@@ -78,16 +78,13 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
     guest = true;
 
     var code = document.getElementById('room_code').value;
-    console.log("clicked enter room with code: " + code);
 
     // Query Firestore to cross-check entered code
     db.collection("rooms").get().then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {
             // doc.data() is never undefined for query doc snapshots
-            console.log(doc.id, " => ", doc.data());
 
             let data = doc.data();
-            console.log(data.id);
 
             if (code == data.id) {
                 guest_data_id = data.id;
@@ -139,7 +136,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
                     guest = false;
 
-                    console.log("logged in as: " + response.display_name);
                     host_name = response.display_name;
                     document.getElementById('room_id').innerHTML = "Room Id: " + room_id;
 
@@ -168,16 +164,12 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
         }
 
         function triggerNextTrack() {
-            console.log("current_track_count: " + currentTrackCount);
-            console.log("triggering next track with id: " + queue[currentTrackCount]);
-            console.log(queue);
             allowNewTrigger = true;
             play(our_device_id, queue[currentTrackCount]);
         }
 
         // Play a specified track on the device id
         function play(device_id, track_id) {
-            console.log("we are in play");
             const token = access_token;
             $.ajax({
                 url: "https://api.spotify.com/v1/me/player/play?device_id=" + device_id,
@@ -197,10 +189,8 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                         'Authorization' : 'Bearer ' + access_token
                     },
                     success: function(data) {
-                        console.log("call to currently playing successful");
                         let progress_ms = data.progress_ms;
                         current_track_progress = progress_ms;
-                        console.log("progress_ms: " + progress_ms);
 
                         document.getElementById('currently_playing').innerHTML = "Currently Playing: " + data.item.name + ", by " + data.item.album.artists[0].name;
 
@@ -211,7 +201,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                         }
                     },
                     error: function(data) {
-                        console.log("some error");
+                        console.log("Some error");
                     }
                 });
 
@@ -276,14 +266,10 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                     let data = doc.data();
 
                     if (firebaseDocumentReference == doc.id) {
-                        console.log("Updating local queue for host");
                         queue = data.queue;
-                        console.log(queue);
                     }
                     else if (guestFirebaseDocumentReference == doc.id) {
-                        console.log("Updating local queue for guest");
                         guest_queue = data.queue;
-                        console.log(guest_queue);
                     }
                 });
             })
@@ -292,7 +278,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
             });
 
             if (!guest && current_track_progress == 0) {
-                console.log("host");
                 triggerNextTrack();
             }
 
@@ -310,7 +295,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                         document.getElementById('next_up').innerHTML = "Next Up: " + data.name + ", by " + data.album.artists[0].name;
                     },
                     error: function(data) {
-                        console.log("some error");
+                        console.log("Some error");
                     }
                 });
 
@@ -327,7 +312,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                         document.getElementById('next_up').innerHTML = "Next Up: " + data.name + ", by " + data.album.artists[0].name;
                     },
                     error: function(data) {
-                        console.log("some error");
+                        console.log("Some error");
                     }
                 });
             }
@@ -340,8 +325,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
         // Handle new search form submit
         document.getElementById("searchBox").addEventListener("submit", function(event) {
-            console.log("inside 1");
-            console.log("searched for: " + document.getElementById('newSearch').value);
             var search = document.getElementById('newSearch').value;
             document.getElementById('newSearch').value = "";
             event.preventDefault();
@@ -356,29 +339,20 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                     'Authorization' : 'Bearer ' + access_token
                 },
                 success: function(data) {
-                    console.log("call successful");
-                    console.log("token: " + access_token);
 
                     // Parse response for tracks
-                    console.log("_______________________");
-                    console.log("Here are the tracks:");
                     for (var i = 0; i < data.tracks.items.length; i++) {
                         let item = data.tracks.items[i];
-                        console.log(item.name);
 
                         // Populate list of results
                         let entry = document.createElement("li");
                         entry.appendChild(document.createTextNode("Track: " + item.name));
 
-                        console.log("id: " + item.id);
-
                         // Add onclick listener to add selected track to queue
                         entry.onclick = function() {
                             queue.push(item.id);
 
-                            console.log("current_track_progress: " + current_track_progress + " queue.length = " + queue.length);
                             if (current_track_progress == 0) {
-                                // currentTrackCount += 1;
                                 triggerNextTrack();
                             }
 
@@ -405,7 +379,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
                 },
                 error: function(data) {
-                    console.log("some error");
+                    console.log("Some error");
                 }
             });
         });
@@ -415,8 +389,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
         // Handle new search form submit
         document.getElementById("searchBox2").addEventListener("submit", function(event) {
-            console.log("inside 1");
-            console.log("searched for: " + document.getElementById('newSearch2').value);
             var search = document.getElementById('newSearch2').value;
             document.getElementById('newSearch2').value = "";
             event.preventDefault();
@@ -431,12 +403,8 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                     'Authorization' : 'Bearer ' + access_token
                 },
                 success: function(data) {
-                    console.log("call successful GUEST");
-                    console.log("token: " + access_token);
 
                     // Parse response for tracks
-                    console.log("_______________________");
-                    console.log("Here are the tracks:");
                     for (var i = 0; i < data.tracks.items.length; i++) {
                         let item = data.tracks.items[i];
                         console.log(item.name);
@@ -444,8 +412,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                         // Populate list of results
                         let entry = document.createElement("li");
                         entry.appendChild(document.createTextNode("Track: " + item.name));
-
-                        console.log("id: " + item.id);
 
                         // Add onclick listener to add selected track to queue
                         entry.onclick = function() {
@@ -473,7 +439,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
                 },
                 error: function(data) {
-                    console.log("some error");
+                    console.log("Some error");
                 }
             });
         });
