@@ -9,6 +9,7 @@
     <title>Insta DJ</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
 
     <script src="https://www.gstatic.com/firebasejs/5.7.0/firebase.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.5.5/firebase-app.js"></script>
@@ -30,15 +31,17 @@
 <body>
     <div class="container">
         <div id="login">
-            <h1>Welcome to Insta Jam!</h1>
-            <h2>Create a New Room</h2>
-            <a href="/login" class="btn btn-primary">Log in with Spotify</a>
-
-            <h2>Enter an Existing Room Code</h2>
-
+            <h1 id="title"><i class="fas fa-music"></i>  INSTA DJ  <i class="fas fa-music"></i></h1>
+            <br>
+            <a href="/login" class="btn btn-primary">CREATE A ROOM</a>
+            <br>
+            <h2> OR </h2>
             <form id="join_existing">
-                <input id="room_code" type="text" name="code" placeholder="ex: abcdef">
-                <button>Join</button>
+                <i id="lock" class="fas fa-lock"></i> &nbsp;
+                <input id="room_code" type="text" name="code" placeholder="Enter Room code"> <br> <br>
+                <button id="join">JOIN ROOM</button>
+                <br>
+                <br>
             </form>
         </div>
         <div id="loggedin">
@@ -49,9 +52,10 @@
             <div id="search">
                 <h3>Add a song to queue</h3>
                 <form id="searchBox">
-                    <input id="newSearch" type="text" name="search" placeholder="Song">
+                    <input id="newSearch" type="text" name="search" placeholder="Enter a song name">
                     <button>Search</button>
                 </form>
+                <br>
                 <div>
                     <ul id="resultsList">
                     </ul>
@@ -59,7 +63,7 @@
             </div>
         </div>
         <div id="guest">
-            <h1>Welcome to Insta Jam!</h1>
+            <h1 id="title"><i class="fas fa-music"></i>  INSTA DJ  <i class="fas fa-music"></i></h1>
             <h2 id="host_name">Host: </h2>
             <h3 id="room_id">Room Code: <h3>
             <h3 id="currently_playing">Currently Playing: </h3>
@@ -81,7 +85,7 @@
     </div>
 
     <script id="user-profile-template" type="text/x-handlebars-template">
-        <h1>Welcome to Insta Jam!</h1>
+        <h1 id="title"><i class="fas fa-music"></i>  INSTA DJ  <i class="fas fa-music"></i></h1>
         <h2>Host: {{display_name}}</h2>
         <h3 id="room_id">Room Code: <h3>
         <h3 id="currently_playing">Currently Playing: </h3>
