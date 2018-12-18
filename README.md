@@ -1,6 +1,6 @@
 # INSTA DJ
 
-NOTES: We used node.js for this project.
+NOTE: We used node.js for this project.
 
 
 ## Loading the app
