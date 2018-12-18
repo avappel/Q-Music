@@ -343,6 +343,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
             console.log("inside 1");
             console.log("searched for: " + document.getElementById('newSearch').value);
             var search = document.getElementById('newSearch').value;
+            document.getElementById('newSearch').value = "";
             event.preventDefault();
 
             // Empty list of results before populating with new results
@@ -417,6 +418,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
             console.log("inside 1");
             console.log("searched for: " + document.getElementById('newSearch2').value);
             var search = document.getElementById('newSearch2').value;
+            document.getElementById('newSearch2').value = "";
             event.preventDefault();
 
             // Empty list of results before populating with new results
