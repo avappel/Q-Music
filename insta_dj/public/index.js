@@ -180,32 +180,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                     console.log(data);
                 }
             });
-
-            // setInterval(function(){
-            //     $.ajax({
-            //         url: 'https://api.spotify.com/v1/me/player/currently-playing',
-            //         type: 'GET',
-            //         headers: {
-            //             'Authorization' : 'Bearer ' + access_token
-            //         },
-            //         success: function(data) {
-            //             let progress_ms = data.progress_ms;
-            //             current_track_progress = progress_ms;
-            //
-            //             document.getElementById('currently_playing').innerHTML = "Currently Playing: " + data.item.name + ", by " + data.item.album.artists[0].name;
-            //
-            //             if (progress_ms == 0 && allowNewTrigger) {
-            //                 currentTrackCount += 1;
-            //                 triggerNextTrack();
-            //                 allowNewTrigger = false;
-            //             }
-            //         },
-            //         error: function(data) {
-            //             console.log("Some error");
-            //         }
-            //     });
-            //
-            // }, 3000);
         }
 
 
@@ -259,7 +233,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
 
         setInterval(function(){
-            // Query Firestore to cross-check entered code
+            // Query Firestore to synchronize queues THIS IS BAD - FIX
             db.collection("rooms").get().then(function(querySnapshot) {
                 querySnapshot.forEach(function(doc) {
 
@@ -282,8 +256,6 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
             }
 
             if (guest && guest_queue[currentTrackCount + 1]) {
-                document.getElementById('next_up').innerHTML = "Next Up: " + guest_queue[currentTrackCount + 1]; // + ", by " + data.item.album.artists[0].name;
-
 
                 $.ajax({
                     url: 'https://api.spotify.com/v1/tracks/' + guest_queue[currentTrackCount + 1],
