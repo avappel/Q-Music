@@ -62,7 +62,7 @@ var currentTrackCount = 0;
 
 var allowNewTrigger = false;
 
-let room_id = ID();
+var room_id = ID();
 
 var firebaseDocumentReference;
 
@@ -77,6 +77,7 @@ var firstSearch = true;
 var firstPlay = true;
 
 var trackDurations = [];
+
 
 document.getElementById("join_existing").addEventListener("submit", function(event) {
     event.preventDefault();
@@ -93,6 +94,10 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
             let data = doc.data();
 
             if (code == data.id) {
+                console.log("i get here");
+
+                room_id = code;
+
                 guest_data_id = data.id;
                 guest_host = data.host;
                 guest_queue = data.queue;
@@ -108,6 +113,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                 $('#guest').show();
             }
         });
+
     })
     .catch(function(error) {
         console.log("Error getting documents: ", error);
@@ -117,6 +123,30 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
 
 (function() {
+
+
+
+    // Firestore listener
+    db.collection("rooms").onSnapshot(snapshot => {
+        console.log("outside " + room_id);
+
+        let changes = snapshot.docChanges();
+        changes.forEach(change => {
+            console.log("inside" + change.doc.data().id);
+            if (room_id == change.doc.data().id) {
+                console.log(change.doc.data());
+                if (guest) {
+                    guest_queue = (change.doc.data().queue);
+                    console.log("updated queue: " + guest_queue);
+                }
+                else {
+                    queue = (change.doc.data().queue);
+                    console.log("updated queue: " + queue);
+                }
+            }
+
+        })
+    })
 
     if (error) {
         alert('There was an error during the authentication: ' + error);
@@ -184,7 +214,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                 data: JSON.stringify({
                     "uris": [track_id]
                 }),
-                beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + access_token );},
+                beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);},
                 success: function(data) {
                     console.log(data);
                     firstPlay = false;
@@ -268,39 +298,39 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
             //     triggerNextTrack();
             // }
 
-            // if (guest && guest_queue[currentTrackCount + 1]) {
-            //
-            //     $.ajax({
-            //         url: 'https://api.spotify.com/v1/tracks/' + guest_queue[currentTrackCount + 1],
-            //         type: 'GET',
-            //         headers: {
-            //             'Authorization' : 'Bearer ' + access_token
-            //         },
-            //         success: function(data) {
-            //             document.getElementById('next_up').innerHTML = "Next Up: " + data.name + ", by " + data.album.artists[0].name;
-            //         },
-            //         error: function(data) {
-            //             console.log("Some error");
-            //         }
-            //     });
-            //
-            // }
-            // else if (!guest && queue[currentTrackCount + 1]) {
-            //
-            //     $.ajax({
-            //         url: 'https://api.spotify.com/v1/tracks/' + queue[currentTrackCount + 1],
-            //         type: 'GET',
-            //         headers: {
-            //             'Authorization' : 'Bearer ' + access_token
-            //         },
-            //         success: function(data) {
-            //             document.getElementById('next_up').innerHTML = "Next Up: " + data.name + ", by " + data.album.artists[0].name;
-            //         },
-            //         error: function(data) {
-            //             console.log("Some error");
-            //         }
-            //     });
-            // }
+            if (guest && guest_queue[currentTrackCount + 1]) {
+
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/tracks/' + guest_queue[currentTrackCount + 1],
+                    type: 'GET',
+                    headers: {
+                        'Authorization' : 'Bearer ' + access_token
+                    },
+                    success: function(data) {
+                        document.getElementById('next_up').innerHTML = "Next Up: " + data.name + ", by " + data.album.artists[0].name;
+                    },
+                    error: function(data) {
+                        console.log("Some error");
+                    }
+                });
+
+            }
+            else if (!guest && queue[currentTrackCount + 1]) {
+
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/tracks/' + queue[currentTrackCount + 1],
+                    type: 'GET',
+                    headers: {
+                        'Authorization' : 'Bearer ' + access_token
+                    },
+                    success: function(data) {
+                        document.getElementById('next_up').innerHTML = "Next Up: " + data.name + ", by " + data.album.artists[0].name;
+                    },
+                    error: function(data) {
+                        console.log("Some error");
+                    }
+                });
+            }
 
 
             $.ajax({
@@ -321,13 +351,26 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                     console.log("allowNewTrigger: " + allowNewTrigger);
                     console.log("firstPlay: " + firstPlay);
 
-                    if (queue.length > currentTrackCount) {
-                        if ((current_track_progress == 0 && allowNewTrigger)  || firstPlay) {
-                            console.log("here");
-                            triggerNextTrack();
-                            currentTrackCount += 1;
-                            // allowNewTrigger = false;
-                            // firstPlay = false;
+                    if (guest) {
+                        if (guest_queue.length > currentTrackCount) {
+                            if ((current_track_progress == 0 && allowNewTrigger)  || firstPlay) {
+                                console.log("here");
+                                triggerNextTrack();
+                                currentTrackCount += 1;
+                                // allowNewTrigger = false;
+                                // firstPlay = false;
+                            }
+                        }
+                    }
+                    else {
+                        if (queue.length > currentTrackCount) {
+                            if ((current_track_progress == 0 && allowNewTrigger)  || firstPlay) {
+                                console.log("here");
+                                triggerNextTrack();
+                                currentTrackCount += 1;
+                                // allowNewTrigger = false;
+                                // firstPlay = false;
+                            }
                         }
                     }
 
@@ -374,100 +417,28 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                         entry.onclick = function() {
                             queue.push("spotify:track:" + item.id);
 
-                            // $.ajax({
-                            //     url: 'https://api.spotify.com/v1/tracks/' + item.id,
-                            //     type: 'GET',
-                            //     headers: {
-                            //         'Authorization' : 'Bearer ' + access_token
-                            //     },
-                            //     success: function(data) {
-                            //         console.log("duration: " + data.duration_ms);
-                            //         trackDurations.push(data.duration_ms);
-                            //     },
-                            //     error: function(data) {
-                            //         console.log("Some error");
-                            //     }
-                            // });
 
                             if (current_track_progress == 0) {
                                 triggerNextTrack();
                             }
 
-                            // var start = Date.now();
-                            // $.ajax({
-                            //     url: 'https://api.spotify.com/v1/me/player/currently-playing',
-                            //     type: 'GET',
-                            //     headers: {
-                            //         'Authorization' : 'Bearer ' + access_token
-                            //     },
-                            //     success: function(data) {
-                            //
-                            //         // if (firstSearch) {
-                            //         //     current_track_progress = 0;
-                            //         //     firstSeach = false;
-                            //         // }
-                            //         // else {
-                            //         //     let progress_ms = data.progress_ms;
-                            //         //     current_track_progress = progress_ms;
-                            //         // }
-                            //
-                            //         let progress_ms = data.progress_ms;
-                            //         current_track_progress = progress_ms;
-                            //
-                            //
-                            //         console.log(data);
-                            //
-                            //
-                            //         var end = Date.now();
-                            //         var offset = end - start;
-                            //
-                            //         // document.getElementById('currently_playing').innerHTML = "Currently Playing: " + data.item.name + ", by " + data.item.album.artists[0].name;
-                            //         //
-                            //         // if (progress_ms == 0 && allowNewTrigger) {
-                            //         //     currentTrackCount += 1;
-                            //         //     triggerNextTrack();
-                            //         //     allowNewTrigger = false;
-                            //         // }
-                            //
-                            //         console.log("queue: " + queue);
-                            //         console.log(current_track_progress);
-                            //
-                            //         $.ajax({
-                            //             url: "https://api.spotify.com/v1/me/player/play",
-                            //             type: "PUT",
-                            //             data: JSON.stringify({
-                            //                 "uris": queue,
-                            //                 "position_ms": current_track_progress + offset
-                            //             }),
-                            //             // data: "{\"uris\":[\"spotify:track:1301WleyT98MSxVHPZCA6M\"]}",
-                            //             beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + access_token );},
-                            //             success: function(data) {
-                            //                 console.log(data);
-                            //             }
-                            //         });
-                            //     },
-                            //     error: function(data) {
-                            //         console.log("Some error");
-                            //     }
-                            // });
+                            // Update Firestore
+                            var roomRef = db.collection("rooms").doc(firebaseDocumentReference);
+
+                            // Set the queue in Firestore to our queue
+                            return roomRef.update({
+                                queue: queue,
+                                device_id: our_device_id
+                            })
+                            .then(function() {
+                                console.log("Document successfully updated!");
+                            })
+                            .catch(function(error) {
+                                // The document probably doesn't exist.
+                                console.error("Error updating document: ", error);
+                            });
 
 
-
-                            // // Update Firestore
-                            // var roomRef = db.collection("rooms").doc(firebaseDocumentReference);
-                            //
-                            // // Set the queue in Firestore to our queue
-                            // return roomRef.update({
-                            //     queue: queue,
-                            //     device_id: our_device_id
-                            // })
-                            // .then(function() {
-                            //     console.log("Document successfully updated!");
-                            // })
-                            // .catch(function(error) {
-                            //     // The document probably doesn't exist.
-                            //     console.error("Error updating document: ", error);
-                            // });
 
                         };
 
@@ -512,7 +483,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
 
                         // Add onclick listener to add selected track to queue
                         entry.onclick = function() {
-                            guest_queue.push(item.id);
+                            guest_queue.push("spotify:track:" + item.id);
 
                             // Update Firestore
                             var roomRef = db.collection("rooms").doc(guestFirebaseDocumentReference);
