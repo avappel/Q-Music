@@ -201,6 +201,11 @@ function HostApplication() {
             document.getElementById('next_up').innerHTML = "";
         }
 
+        if (allowNewTrigger || firstPlay) {
+            allowNewTrigger = false;
+            triggerNextTrack();
+        }
+
         $.ajax({
             url: 'https://api.spotify.com/v1/me/player/currently-playing',
             type: 'GET',
