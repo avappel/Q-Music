@@ -41,7 +41,8 @@ var next_up = "";
 var temp_currently_playing;
 var temp_next_up;
 var shifted = false;
-
+var play_url = "";
+var currently_playing_image_src = "";
 
 var ID = function () {
     // Math.random should be unique because of its seeding algorithm.
@@ -109,7 +110,14 @@ function ResultsList(resultsListQuery) {
 
             // Populate list of results
             let entry = document.createElement("li");
-            entry.appendChild(document.createTextNode("Track: " + item.name));
+
+            var image = new Image();
+            image.src = item.album.images[0].url;
+            image.height = 40;
+            image.width = 40;
+            entry.appendChild(image);
+
+            entry.appendChild(document.createTextNode("     " + item.name + ", by " + item.album.artists[0].name));
 
             // Add onclick listener to add selected track to queue
             entry.onclick = function() {
@@ -155,6 +163,16 @@ function GuestApplication() {
     setInterval(function() {
         document.getElementById('currently_playing').innerHTML = currently_playing;
         document.getElementById('next_up').innerHTML = next_up;
+
+        // Set currently playing image
+        var currently_playing_image_guest = document.getElementById("currently_playing_image_guest");
+
+        currently_playing_image_guest.src = currently_playing_image_src;
+        currently_playing_image_guest.height = 250;
+        currently_playing_image_guest.width = 250;
+
+        console.log(currently_playing_image_src);
+
     }, 2000);
 }
 
@@ -216,6 +234,14 @@ function HostApplication() {
                 let progress_ms = data.progress_ms;
                 current_track_progress = progress_ms;
 
+                // Set currently playing image
+                var currently_playing_image = document.getElementById("currently_playing_image");
+
+                currently_playing_image_src = data.item.album.images[0].url;
+                currently_playing_image.src = currently_playing_image_src;
+                currently_playing_image.height = 250;
+                currently_playing_image.width = 250;
+
                 if (current_track_progress == 0) {
                     allowNewTrigger = true;
 
@@ -253,7 +279,8 @@ function HostApplication() {
 
             // Set currently_playing and next up in Firestore to currently playing and next up songs
             return roomRef.update( {
-                currently_playing: currently_playing
+                currently_playing: currently_playing,
+                currently_playing_image_src: currently_playing_image_src
             })
             .then(function() {
                 console.log("Document successfully updated!");
@@ -311,6 +338,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                 access_token = data.token;
                 next_up = data.next_up;
                 currently_playing = data.currently_playing;
+                currently_playing_image_src = data.currently_playing_image_src;
                 firebaseDocumentReference = doc.id;
 
 
@@ -355,8 +383,16 @@ function triggerNextTrack() {
 
 // Play a specified track on the device id
 function play(device_id, track_id) {
+
+    if (firstPlay) {
+        play_url = "https://api.spotify.com/v1/me/player/play?device_id=" + device_id
+    }
+    else {
+        play_url = "https://api.spotify.com/v1/me/player/play"
+    }
+
     $.ajax({
-        url: "https://api.spotify.com/v1/me/player/play?device_id=" + device_id,
+        url: play_url,
         type: "PUT",
         data: JSON.stringify({
             "uris": [track_id]
@@ -384,6 +420,7 @@ function play(device_id, track_id) {
                 queue = (change.doc.data().queue);
                 currently_playing = (change.doc.data().currently_playing);
                 next_up = (change.doc.data().next_up);
+                currently_playing_image_src = (change.doc.data().currently_playing_image_src);
             }
         })
     })
@@ -427,7 +464,8 @@ function play(device_id, track_id) {
                         queue: queue,
                         token: access_token,
                         currently_playing: currently_playing,
-                        next_up: next_up
+                        next_up: next_up,
+                        currently_playing_image_src: currently_playing_image_src
                     })
                     .then(function(docRef) {
                         console.log("Document written with ID: ", docRef.id);
