@@ -3,34 +3,32 @@
 // 12/17/18
 // Some starter code used from Spotify Web and Player API Quick Start Guides
 
-
 var userProfileSource = document.getElementById('user-profile-template').innerHTML,
-userProfileTemplate = Handlebars.compile(userProfileSource),
-userProfilePlaceholder = document.getElementById('user-profile');
+    userProfileTemplate = Handlebars.compile(userProfileSource),
+    userProfilePlaceholder = document.getElementById('user-profile');
 
 var oauthSource = document.getElementById('oauth-template').innerHTML,
-oauthTemplate = Handlebars.compile(oauthSource),
-oauthPlaceholder = document.getElementById('oauth');
+    oauthTemplate = Handlebars.compile(oauthSource),
+    oauthPlaceholder = document.getElementById('oauth');
 
 var params = getHashParams();
 
 var access_token = params.access_token,
-refresh_token = params.refresh_token,
-error = params.error;
+    refresh_token = params.refresh_token,
+    error = params.error;
 
 // Initialize Cloud Firestore through Firebase
 var db = firebase.firestore();
 
 // Disable deprecated features
 db.settings({
-  timestampsInSnapshots: true
+    timestampsInSnapshots: true
 });
 
 var guest;
 var our_device_id;
 var current_track_progress = 0;
 var queue = [];
-var currentTrackCount = 0;
 var allowNewTrigger = false;
 var room_id;
 var firebaseDocumentReference;
@@ -43,6 +41,7 @@ var temp_next_up;
 var shifted = false;
 var play_url = "";
 var currently_playing_image_src = "";
+var users = 0;
 
 var ID = function () {
     // Math.random should be unique because of its seeding algorithm.
@@ -55,7 +54,7 @@ var ID = function () {
 function getHashParams() {
     var hashParams = {};
     var e, r = /([^&;=]+)=?([^&;]*)/g,
-    q = window.location.hash.substring(1);
+        q = window.location.hash.substring(1);
     while ( e = r.exec(q)) {
         hashParams[e[1]] = decodeURIComponent(e[2]);
     }
@@ -163,13 +162,16 @@ function GuestApplication() {
     setInterval(function() {
         document.getElementById('currently_playing').innerHTML = currently_playing;
         document.getElementById('next_up').innerHTML = next_up;
+        document.getElementById('users_guest').innerHTML = "Listeners: " + users;
 
         // Set currently playing image
-        var currently_playing_image_guest = document.getElementById("currently_playing_image_guest");
 
-        currently_playing_image_guest.src = currently_playing_image_src;
-        currently_playing_image_guest.height = 250;
-        currently_playing_image_guest.width = 250;
+        if (currently_playing_image_src != "") {
+            var currently_playing_image_guest = document.getElementById("currently_playing_image_guest");
+            currently_playing_image_guest.src = currently_playing_image_src;
+            currently_playing_image_guest.height = 250;
+            currently_playing_image_guest.width = 250;
+        }
 
         console.log(currently_playing_image_src);
 
@@ -192,6 +194,8 @@ function HostApplication() {
     }
 
     setInterval(function() {
+
+        document.getElementById('users').innerHTML = "Listeners: " + users;
 
         if (!queue[0]) {
             return;
@@ -339,6 +343,7 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                 next_up = data.next_up;
                 currently_playing = data.currently_playing;
                 currently_playing_image_src = data.currently_playing_image_src;
+                users = data.users;
                 firebaseDocumentReference = doc.id;
 
 
@@ -346,6 +351,27 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
                 document.getElementById('room_id').innerHTML = "Room Id: " + room_id;
                 $('#login').hide();
                 $('#guest').show();
+
+
+                users += 1;
+
+                console.log("users: " + users);
+
+                // Update Firestore
+                var roomRef = db.collection("rooms").doc(firebaseDocumentReference);
+
+                // Update number of users in Firestore
+                return roomRef.update({
+                    users: users
+                })
+                .then(function() {
+                    console.log("Document successfully updated!");
+                    document.getElementById('users_guest').innerHTML = "Listeners: " + users;
+                })
+                .catch(function(error) {
+                    // The document probably doesn't exist.
+                    console.error("Error updating document: ", error);
+                });
             }
         });
 
@@ -353,6 +379,8 @@ document.getElementById("join_existing").addEventListener("submit", function(eve
     .catch(function(error) {
         console.log("Error getting documents: ", error);
     });
+
+
 });
 
 
@@ -421,6 +449,7 @@ function play(device_id, track_id) {
                 currently_playing = (change.doc.data().currently_playing);
                 next_up = (change.doc.data().next_up);
                 currently_playing_image_src = (change.doc.data().currently_playing_image_src);
+                users = (change.doc.data().users);
             }
         })
     })
@@ -465,11 +494,13 @@ function play(device_id, track_id) {
                         token: access_token,
                         currently_playing: currently_playing,
                         next_up: next_up,
-                        currently_playing_image_src: currently_playing_image_src
+                        currently_playing_image_src: currently_playing_image_src,
+                        users: users + 1
                     })
                     .then(function(docRef) {
                         console.log("Document written with ID: ", docRef.id);
                         firebaseDocumentReference = docRef.id;
+                        document.getElementById('users').innerHTML = "Listeners: " + users;
                     })
                     .catch(function(error) {
                         console.error("Error adding document: ", error);
@@ -487,7 +518,7 @@ function play(device_id, track_id) {
         window.onSpotifyWebPlaybackSDKReady = () => {
             const token = access_token;
             const player = new Spotify.Player({
-                name: "Insta DJ",
+                name: "Insta DJ Web Player",
                 getOAuthToken: cb => { cb(token); }
             });
             window.player = player;
