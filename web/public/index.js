@@ -112,7 +112,7 @@ function ResultsList(resultsListQuery) {
 
             var image = new Image();
             image.src = item.album.images[0].url;
-            image.height = 40;
+            image.height = 40; //height of the album art in the list of search
             image.width = 40;
             entry.appendChild(image);
 
@@ -169,7 +169,7 @@ function GuestApplication() {
         if (currently_playing_image_src != "") {
             var currently_playing_image_guest = document.getElementById("currently_playing_image_guest");
             currently_playing_image_guest.src = currently_playing_image_src;
-            currently_playing_image_guest.height = 250;
+            currently_playing_image_guest.height = 250; //album art of the song currently playing
             currently_playing_image_guest.width = 250;
         }
 
@@ -436,6 +436,10 @@ function play(device_id, track_id) {
     });
 }
 
+//this one works
+function change(button) {
+   $(button).find('i').toggleClass('fa fa-play fa fa-pause')
+}
 
 (function() {
 
