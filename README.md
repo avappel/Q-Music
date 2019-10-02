@@ -1,4 +1,4 @@
-# README: Q-Music
+# Q-Music
 
 This is a Web Application created for collaborative song queueing through Spotify.
 
